@@ -1,0 +1,66 @@
+// SPDX-License-Identifier: GPL-3.0
+
+pragma solidity >=0.7.0 <0.9.0;
+
+contract Registration {
+
+    address owner;  //The address of owner is TA.
+
+    constructor() {
+        owner=msg.sender;
+   }
+    
+    struct UserList{
+        bool tag; //The user’s authorization status
+        string pvk; //The vehicle’s public key
+        uint256 timestamp; //The vehicle’s registration timestamp
+
+    } 
+    mapping(string => UserList) private IDtoUserinfo; //PID to its user list 
+    function CreateUser(string memory PID, bool tag, string memory pvk) public {
+        require(msg.sender==owner);
+        UserList memory newUserList = UserList(tag,pvk,block.timestamp);
+        IDtoUserinfo[PID] = newUserList;
+    }
+
+      
+    function UpdateUser (string memory PID, bool tag) public {
+        require(msg.sender==owner);
+        IDtoUserinfo[PID].tag = tag;
+        //IDtoUserinfo[PID].pvk = pvk;
+        IDtoUserinfo[PID].timestamp = block.timestamp;
+    }
+    function QueryUser(string memory PID) public view returns (bool tag, string memory pvk, uint256 timestamp){
+
+        return (IDtoUserinfo[PID].tag, IDtoUserinfo[PID].pvk, IDtoUserinfo[PID].timestamp);
+
+    }
+
+
+    struct TXList{
+        bool tag;
+        string pvk; //The vehicle’s public key
+        string sg; //Signature
+        uint256 sgtime; //Timestamp for signature
+        //uint256 timestamp; //The vehicle’s registration timeg
+
+    }   
+    
+    mapping(string => TXList)  SGList; //PID to its user list 
+   
+     
+ 
+    function AddTX (string memory PID, string memory pvk,string memory sg,uint256 sgtime) public {
+        require(msg.sender==owner);
+        SGList[PID].pvk = pvk;
+        SGList[PID].sg = sg;
+        SGList[PID].sgtime = sgtime;
+    }
+    function QueryTX(string memory PID) public view returns ( string memory pvk, string memory sg,uint256 sgtime){
+
+        return ( SGList[PID].pvk, SGList[PID].sg, SGList[PID].sgtime);
+
+    }
+
+
+}
